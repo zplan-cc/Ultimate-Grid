@@ -1,0 +1,197 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source">
+      <UniqueIdentifier>{11924c9d-c749-4ba7-a80f-307763e214d5}</UniqueIdentifier>
+      <Extensions>cpp</Extensions>
+    </Filter>
+    <Filter Include="include">
+      <UniqueIdentifier>{09f011ee-d047-4f7d-9c8c-2750b90fd163}</UniqueIdentifier>
+      <Extensions>h</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\Source\UGCBType.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\UGCell.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\UGCelTyp.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\UGCnrBtn.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\UGCTarrw.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\UGCtrl.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\UGDLType.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\UGDrgDrp.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\UGDrwHnt.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\UGDtaSrc.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\UGEdit.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\UGEditBase.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\ugformat.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\uggdinfo.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\UGGrid.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\UGHint.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\ughscrol.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\ugLstBox.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\UGMEdit.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\UGMemMan.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\UGMultiS.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\ugprint.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\ugptrlst.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\ugsidehd.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\UGStrOp.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\ugtab.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\UGTopHdg.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\ugvscrol.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\UGXPThemes.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="StdAfx.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\Include\UGCBType.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\UGCell.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\UGCelTyp.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\UGCnrBtn.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\UGCTarrw.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\UGCtrl.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\ugdefine.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\UGDLType.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\UGDrgDrp.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\UGDrwHnt.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\UGDtaSrc.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\UGEdit.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\UGEditBase.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\ugformat.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\uggdinfo.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\UGGrid.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\UGHint.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\ughscrol.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\uglstbox.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\UGMEdit.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\UGMemMan.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\UGMultiS.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\ugprint.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\ugptrlst.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\ugsidehd.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\ugstruct.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\ugtab.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\UGTopHdg.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\ugvscrol.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="StdAfx.h">
+      <Filter>include</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

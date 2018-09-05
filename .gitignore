@@ -1,3 +1,10 @@
+# Build results
+BuildLib/ugmfclib___*/
+BuildLib/Backup/
+
+# Visual Studio 2015 cache/options directory
+.vs/
+
 # Compiled Object files
 *.slo
 *.lo

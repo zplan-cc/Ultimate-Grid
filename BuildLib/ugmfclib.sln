@@ -1,7 +1,9 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 9.00
-# Visual Studio 2005
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ugmfclib", "ugmfclib.vcproj", "{E269D9EC-F629-47AE-85F2-4C30D6665960}"
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27703.2018
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ugmfclib", "ugmfclib.vcxproj", "{E269D9EC-F629-47AE-85F2-4C30D6665960}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,8 +25,8 @@ Global
 		UGRelOleMFCStatic|Win32 = UGRelOleMFCStatic|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{E269D9EC-F629-47AE-85F2-4C30D6665960}.UGDbgMFCDLL Unicode|Win32.ActiveCfg = UGDbgMFCDLL Unicode|Win32
-		{E269D9EC-F629-47AE-85F2-4C30D6665960}.UGDbgMFCDLL Unicode|Win32.Build.0 = UGDbgMFCDLL Unicode|Win32
+		{E269D9EC-F629-47AE-85F2-4C30D6665960}.UGDbgMFCDLL Unicode|Win32.ActiveCfg = UGDbgOleMFCStatic Unicode|Win32
+		{E269D9EC-F629-47AE-85F2-4C30D6665960}.UGDbgMFCDLL Unicode|Win32.Build.0 = UGDbgOleMFCStatic Unicode|Win32
 		{E269D9EC-F629-47AE-85F2-4C30D6665960}.UGDbgMFCDLL|Win32.ActiveCfg = UGDbgMFCDLL|Win32
 		{E269D9EC-F629-47AE-85F2-4C30D6665960}.UGDbgMFCDLL|Win32.Build.0 = UGDbgMFCDLL|Win32
 		{E269D9EC-F629-47AE-85F2-4C30D6665960}.UGDbgMFCStatic Unicode|Win32.ActiveCfg = UGDbgMFCStatic Unicode|Win32
@@ -58,5 +60,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B9036712-1A71-485F-818B-B8CE1A1C479E}
 	EndGlobalSection
 EndGlobal
