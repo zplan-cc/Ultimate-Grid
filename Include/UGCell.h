@@ -4,7 +4,7 @@
 	Source file : UGCell.cpp
 	Header file : UGCell.h
 // This software along with its related components, documentation and files ("The Libraries")
-// is © 1994-2007 The Code Project (1612916 Ontario Limited) and use of The Libraries is
+// is ?1994-2007 The Code Project (1612916 Ontario Limited) and use of The Libraries is
 // governed by a software license agreement ("Agreement").  Copies of the Agreement are
 // available at The Code Project (www.codeproject.com), as part of the package you downloaded
 // to obtain this file, or directly from our office.  For a copy of the license governing
@@ -106,7 +106,8 @@ protected:
 							//pointer to a format class
 							//to validate editing and general setting
 							//also used for diplay formating
-	
+    CString m_timeformat;  //settimeÊ±ºòµ÷ÓÃµÄÄ¬ÈÏformat
+
 	CUGCell * m_cellStyle;	//CUGCell *m_cellStyle;
 							//pointer to a property style cell object
 
@@ -168,7 +169,6 @@ public:
 	// XP style set and get
 	UGXPCellType GetXPStyle() { return m_XPStyle; }
 	void SetXPStyle(UGXPCellType type) { m_XPStyle = type; /*m_propSetFlags &= UGCELL_XP_STYLE_SET;*/ }
-
 	//cell information copying functions
 	int		CopyInfoTo(CUGCell *dest);
 	int		CopyInfoFrom(CUGCell *source);
@@ -271,6 +271,7 @@ public:
 
 	//formating and validation
 	int		SetFormatClass(CUGCellFormat * format);
+    void    SetTimeFormat(CString format) { m_timeformat = format; }
 	CUGCellFormat*	GetFormatClass();
 
 	int		SetCellStyle(CUGCell *cell);
