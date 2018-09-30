@@ -941,7 +941,10 @@ int	CUGCell::SetTime(int second,int minute,int hour,int day,int month,int year)
 	COleDateTime odt;
 	odt.SetDateTime(year,month,day,hour,minute,second);
 	// set the display string
-	SetText( odt.Format());  // use default of LANG_USER_DEFAULT
+    if (m_timeformat == _T(""))
+        SetText(odt.Format());  // use default of LANG_USER_DEFAULT
+    else
+        SetText(odt.Format(m_timeformat));
 	// store the native form of the date
 	m_nNumber = odt;
 
