@@ -2546,8 +2546,11 @@ StartEdit
 int	CUGCtrl::StartEdit(int col,long row,int key)
 {
 	// Do not allow to continue if the edit is already started
-	if ( m_editInProgress == TRUE )
+	if (m_editInProgress == TRUE) {
+		if (key > 0)
+			m_editCtrl->SendMessage(WM_CHAR, key, 0);
 		return UG_ERROR;
+	}
 
 	m_editInProgress = TRUE;
 

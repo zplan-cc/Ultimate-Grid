@@ -3,7 +3,7 @@
 **************************************************************************
 	Source file : UGEditBase.cpp
 // This software along with its related components, documentation and files ("The Libraries")
-// is © 1994-2007 The Code Project (1612916 Ontario Limited) and use of The Libraries is
+// is ?1994-2007 The Code Project (1612916 Ontario Limited) and use of The Libraries is
 // governed by a software license agreement ("Agreement").  Copies of the Agreement are
 // available at The Code Project (www.codeproject.com), as part of the package you downloaded
 // to obtain this file, or directly from our office.  For a copy of the license governing
@@ -141,12 +141,6 @@ LRESULT CUGEditBase::WindowProc(UINT message, WPARAM wParam, LPARAM lParam)
 
 			if( pNewWnd != m_ctrl )
 				m_ctrl->OnKillFocus( UG_GRID, pNewWnd );
-
-			if(pNewWnd->GetSafeHwnd() != NULL)
-			{
-				if( pNewWnd == m_ctrl )
-					::SetFocus( m_ctrl->m_CUGGrid->GetSafeHwnd());
-			}
 
 			CString string;
 			GetWindowText(string);
