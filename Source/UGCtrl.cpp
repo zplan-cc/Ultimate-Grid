@@ -2662,8 +2662,8 @@ int	CUGCtrl::StartEdit(int col,long row,int key)
 
 			m_editCtrl->SetParent(m_editParent);
 			
-			m_editCtrl->SetWindowPos(&wndTop,rect.left,rect.top,
-				rect.right-rect.left,rect.bottom-rect.top,0);
+			m_editCtrl->SetWindowPos(&wndTop,rect.left,rect.top+1,
+				rect.right-rect.left,rect.bottom-rect.top-1,0);
 
 			m_editCtrl->ShowWindow(SW_SHOW);
 
