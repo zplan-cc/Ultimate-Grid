@@ -3,7 +3,7 @@
 **************************************************************************
 	Source file : UGDLType.cpp
 // This software along with its related components, documentation and files ("The Libraries")
-// is © 1994-2007 The Code Project (1612916 Ontario Limited) and use of The Libraries is
+// is ?1994-2007 The Code Project (1612916 Ontario Limited) and use of The Libraries is
 // governed by a software license agreement ("Agreement").  Copies of the Agreement are
 // available at The Code Project (www.codeproject.com), as part of the package you downloaded
 // to obtain this file, or directly from our office.  For a copy of the license governing
@@ -440,9 +440,9 @@ void CUGDropListType::OnDraw(CDC *dc,RECT *rect,int col,long row,CUGCell *cell,i
 
 	float fScale = 1.0;
 
-#ifdef UG_ENABLE_PRINTING
-	fScale = m_ctrl->GetUGPrint()->GetPrintVScale(dc);
-#endif
+//#ifdef UG_ENABLE_PRINTING
+	//fScale = m_ctrl->GetUGPrint()->GetPrintVScale(dc);  //È¡Ïû´òÓ¡Æ«ÒÆÁ¿
+//#endif
 
 	RECT rcCombo = *rect;
 
@@ -455,6 +455,11 @@ void CUGDropListType::OnDraw(CDC *dc,RECT *rect,int col,long row,CUGCell *cell,i
 
 		DrawBorder(dc,rect,rect,cell);
 
+        if (dc->IsPrinting())   //´òÓ¡×´Ì¬²»ÏÔÊ¾Ñ¡Ôñ¿ò£¬Ö±½ÓÏÔÊ¾ÎÄ×ÖÍË³ö
+        {
+            DrawText(dc, rect, 0, col, row, cell, selected, current);
+            return;
+        }
 		// The printer and the monitor have different resolutions.
 		// So we should adjust the size of the button.
 
