@@ -606,8 +606,8 @@ int CUGDropListType::StartDropList()
 		return UG_SUCCESS;
 
 	//get the current row and col
-	m_btnCol  = m_ctrl->GetCurrentCol();
-	m_btnRow = m_ctrl->GetCurrentRow();
+	//m_btnCol  = m_ctrl->GetCurrentCol();
+	//m_btnRow = m_ctrl->GetCurrentRow();
 
 	//add the strings to the CStringList
 	CString string;
