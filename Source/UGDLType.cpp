@@ -634,11 +634,13 @@ int CUGDropListType::StartDropList()
 	lf.lfHeight = 12;
 
 	//get the font
-	if(cell.IsPropertySet(UGCELL_FONT_SET))
-		font = cell.GetFont();
-	else if(m_ctrl->m_GI->m_defFont != NULL)
+	//if(cell.IsPropertySet(UGCELL_FONT_SET))
+	//	font = cell.GetFont();
+	//else if(m_ctrl->m_GI->m_defFont != NULL)
+	//	font = m_ctrl->m_GI->m_defFont;
+    if (m_ctrl->m_GI->m_defFont != NULL) 
 		font = m_ctrl->m_GI->m_defFont;
-	
+
 	if(font == NULL)
 		font = CFont::FromHandle((HFONT)GetStockObject(SYSTEM_FONT));
 
