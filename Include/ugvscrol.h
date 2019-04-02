@@ -15,6 +15,7 @@
 *************************************************************************/
 #ifndef _ugvscrol_H_
 #define _ugvscrol_H_
+#include <vector>
 
 class UG_CLASS_DECL CUGVScroll : public CScrollBar
 {
@@ -67,12 +68,14 @@ protected:
 
 	long			m_trackRowPos;
 
+	std::vector<int> visible_rows_;
+
 public:
 
 	//internal functions
 	void Update();
-	virtual void Moved();
-	virtual void VScroll(UINT nSBCode, UINT nPos);
+	void Moved();
+	void VScroll(UINT nSBCode, UINT nPos);
 
 };
 

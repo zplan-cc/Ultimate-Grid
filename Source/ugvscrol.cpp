@@ -63,6 +63,140 @@ void CUGVScroll::Update()
 	Moved();
 }
 
+
+void CUGVScroll::Moved() {
+  if (m_GI->m_paintMode == FALSE) return;
+
+  BOOL bScrolled = FALSE;
+  int top_row_pos = 0;
+  int max_top_row_pos = 0;
+
+  visible_rows_.resize(0);
+  visible_rows_.reserve(m_GI->m_numberRows);
+  for (int i = 0; i < m_GI->m_numberRows; ++i) {
+    if (m_GI->m_maxTopRow == i) max_top_row_pos = visible_rows_.size();
+    if (m_GI->m_topRow == i) top_row_pos = visible_rows_.size();
+    if (m_ctrl->GetRowHeight(i) != 0) visible_rows_.push_back(i);
+  }
+
+  // set the scroll range
+  if (m_lastMaxTopRow != m_GI->m_maxTopRow ||
+      m_lastScrollMode != m_GI->m_vScrollMode ||
+      m_lastNumLockRow != m_GI->m_numLockRows) {
+    // set the last value vars
+    m_lastMaxTopRow = m_GI->m_maxTopRow;
+    m_lastScrollMode = m_GI->m_vScrollMode;
+    m_lastNumLockRow = m_GI->m_numLockRows;
+
+    if (UG_SCROLLJOYSTICK == m_GI->m_vScrollMode) {
+      SCROLLINFO ScrollInfo;
+      ScrollInfo.cbSize = sizeof(SCROLLINFO);
+      ScrollInfo.fMask = SIF_PAGE | SIF_RANGE | SIF_POS;
+      ScrollInfo.nPage = 0;
+      ScrollInfo.nMin = 0;
+      ScrollInfo.nMax = 2;
+      ScrollInfo.nPos = 1;
+      SetScrollInfo(&ScrollInfo, FALSE);
+      visible_rows_.resize(2);
+      visible_rows_[0] = 0;
+      visible_rows_[1] = 0;
+      Invalidate();
+    } else {
+      SCROLLINFO ScrollInfo;
+
+      ScrollInfo.cbSize = sizeof(SCROLLINFO);
+      ScrollInfo.fMask = SIF_PAGE | SIF_RANGE;
+
+      if (m_GI->m_defRowHeight < 1) m_GI->m_defRowHeight = 1;
+
+      ScrollInfo.nPage = m_GI->m_gridHeight / m_GI->m_defRowHeight;
+
+      ScrollInfo.nMin = m_GI->m_numLockRows;
+      ScrollInfo.nMax = max_top_row_pos + ScrollInfo.nPage - 1;
+      SetScrollInfo(&ScrollInfo, FALSE);
+      Invalidate();
+    }
+    bScrolled = TRUE;
+    m_multiRange = 1;
+    m_multiPos = 1;
+  }
+
+  // set the scroll pos
+  if (m_GI->m_lastTopRow != m_GI->m_topRow || bScrolled == TRUE) {
+    if (UG_SCROLLJOYSTICK == m_GI->m_vScrollMode)
+      SetScrollPos(1, TRUE);
+    else
+      SetScrollPos((int)(top_row_pos * m_multiRange), TRUE);
+
+    m_ctrl->OnViewMoved(UG_VSCROLL, m_GI->m_lastTopRow, m_GI->m_topRow);
+  }
+}
+
+void CUGVScroll::VScroll(UINT nSBCode, UINT nPos) {
+  if (GetFocus() != m_ctrl->m_CUGGrid) m_ctrl->m_CUGGrid->SetFocus();
+
+  m_ctrl->m_GI->m_moveType = 4;
+
+  switch (nSBCode) {
+    case SB_LINEDOWN:
+      m_ctrl->MoveTopRow(UG_LINEDOWN);
+      break;
+    case SB_LINEUP:
+      m_ctrl->MoveTopRow(UG_LINEUP);
+      break;
+    case SB_PAGEUP:
+      m_ctrl->MoveTopRow(UG_PAGEUP);
+      break;
+    case SB_PAGEDOWN:
+      m_ctrl->MoveTopRow(UG_PAGEDOWN);
+      break;
+    case SB_TOP:
+      m_ctrl->MoveTopRow(UG_TOP);
+      break;
+    case SB_BOTTOM:
+      m_ctrl->MoveTopRow(UG_BOTTOM);
+      break;
+    case SB_THUMBTRACK:
+      if (m_GI->m_vScrollMode == UG_SCROLLTRACKING)  // tracking
+        m_ctrl->SetTopRow((long)((double)visible_rows_[nPos] * m_multiPos));
+
+      m_trackRowPos = (long)((double)visible_rows_[nPos] * m_multiPos) +
+                      m_GI->m_numLockRows;
+
+// scroll hint window
+#ifdef UG_ENABLE_SCROLLHINTS
+      if (m_GI->m_enableVScrollHints) {
+        CString string;
+        RECT rect;
+        GetWindowRect(&rect);
+        rect.top = HIWORD(GetMessagePos());
+        m_ctrl->ScreenToClient(&rect);
+        m_ctrl->m_CUGHint->SetWindowAlign(UG_ALIGNRIGHT | UG_ALIGNVCENTER);
+        m_ctrl->m_CUGHint->SetTextAlign(UG_ALIGNCENTER);
+
+        m_ctrl->OnVScrollHint(m_trackRowPos, &string);
+        m_ctrl->m_CUGHint->SetText(string, FALSE);
+        // TD - set text before move window...
+        m_ctrl->m_CUGHint->MoveHintWindow(rect.left - 1, rect.top, 40);
+        m_ctrl->m_CUGHint->Show();
+      }
+#endif
+      break;
+    case SB_ENDSCROLL:
+      break;
+    case SB_THUMBPOSITION:
+#ifdef UG_ENABLE_SCROLLHINTS
+      if (m_GI->m_enableVScrollHints) m_ctrl->m_CUGHint->Hide();
+#endif
+
+      m_ctrl->SetTopRow((long)((double)visible_rows_[nPos] * m_multiPos));
+
+      break;
+  }
+
+  m_ctrl->m_CUGSideHdg->Invalidate();
+}
+
 /***************************************************
 Moved
 	Updates vertical scrolbar's position and redraws the grid.
@@ -71,68 +205,68 @@ Params:
 Returns:
 	<none>
 *****************************************************/
-void CUGVScroll::Moved()
-{
-	if ( m_GI->m_paintMode == FALSE )
-		return;
-
-	BOOL bScrolled = FALSE;
-
-	//set the scroll range
-	if(	m_lastMaxTopRow != m_GI->m_maxTopRow ||
-		m_lastScrollMode != m_GI->m_vScrollMode ||
-		m_lastNumLockRow != m_GI->m_numLockRows)
-	{
-		//set the last value vars
-		m_lastMaxTopRow = m_GI->m_maxTopRow;
-		m_lastScrollMode = m_GI->m_vScrollMode;
-		m_lastNumLockRow = m_GI->m_numLockRows;
-
-		if (UG_SCROLLJOYSTICK == m_GI->m_vScrollMode)
-		{
-			SCROLLINFO ScrollInfo;
-			ScrollInfo.cbSize = sizeof(SCROLLINFO);
-			ScrollInfo.fMask = SIF_PAGE | SIF_RANGE | SIF_POS;
-			ScrollInfo.nPage = 0;
-			ScrollInfo.nMin = 0;
-			ScrollInfo.nMax = 2;
-			ScrollInfo.nPos = 1;
-			SetScrollInfo(&ScrollInfo, FALSE);
-			Invalidate();
-		}
-		else
-		{
-			SCROLLINFO ScrollInfo;
-
-			ScrollInfo.cbSize = sizeof(SCROLLINFO);
-			ScrollInfo.fMask = SIF_PAGE | SIF_RANGE;
-
-			if (m_GI->m_defRowHeight < 1)
-				m_GI->m_defRowHeight = 1;
-
-			ScrollInfo.nPage = m_GI->m_gridHeight / m_GI->m_defRowHeight;
-
-			ScrollInfo.nMin = m_GI->m_numLockRows;
-			ScrollInfo.nMax = m_GI->m_maxTopRow + ScrollInfo.nPage - 1;
-			SetScrollInfo(&ScrollInfo, FALSE);
-			Invalidate();
-		}
-		bScrolled = TRUE;
-		m_multiRange = 1;
-		m_multiPos = 1;
-	}
-
-	//set the scroll pos
-	if( m_GI->m_lastTopRow != m_GI->m_topRow || bScrolled == TRUE )
-	{
-		if(UG_SCROLLJOYSTICK == m_GI->m_vScrollMode)
-			SetScrollPos(1,TRUE);
-		else
-			SetScrollPos((int)(m_GI->m_topRow * m_multiRange),TRUE);
-
-		m_ctrl->OnViewMoved( UG_VSCROLL, m_GI->m_lastTopRow, m_GI->m_topRow );
-	}
-}
+//void CUGVScroll::Moved()
+//{
+//	if ( m_GI->m_paintMode == FALSE )
+//		return;
+//
+//	BOOL bScrolled = FALSE;
+//
+//	//set the scroll range
+//	if(	m_lastMaxTopRow != m_GI->m_maxTopRow ||
+//		m_lastScrollMode != m_GI->m_vScrollMode ||
+//		m_lastNumLockRow != m_GI->m_numLockRows)
+//	{
+//		//set the last value vars
+//		m_lastMaxTopRow = m_GI->m_maxTopRow;
+//		m_lastScrollMode = m_GI->m_vScrollMode;
+//		m_lastNumLockRow = m_GI->m_numLockRows;
+//
+//		if (UG_SCROLLJOYSTICK == m_GI->m_vScrollMode)
+//		{
+//			SCROLLINFO ScrollInfo;
+//			ScrollInfo.cbSize = sizeof(SCROLLINFO);
+//			ScrollInfo.fMask = SIF_PAGE | SIF_RANGE | SIF_POS;
+//			ScrollInfo.nPage = 0;
+//			ScrollInfo.nMin = 0;
+//			ScrollInfo.nMax = 2;
+//			ScrollInfo.nPos = 1;
+//			SetScrollInfo(&ScrollInfo, FALSE);
+//			Invalidate();
+//		}
+//		else
+//		{
+//			SCROLLINFO ScrollInfo;
+//
+//			ScrollInfo.cbSize = sizeof(SCROLLINFO);
+//			ScrollInfo.fMask = SIF_PAGE | SIF_RANGE;
+//
+//			if (m_GI->m_defRowHeight < 1)
+//				m_GI->m_defRowHeight = 1;
+//
+//			ScrollInfo.nPage = m_GI->m_gridHeight / m_GI->m_defRowHeight;
+//
+//			ScrollInfo.nMin = m_GI->m_numLockRows;
+//			ScrollInfo.nMax = m_GI->m_maxTopRow + ScrollInfo.nPage - 1;
+//			SetScrollInfo(&ScrollInfo, FALSE);
+//			Invalidate();
+//		}
+//		bScrolled = TRUE;
+//		m_multiRange = 1;
+//		m_multiPos = 1;
+//	}
+//
+//	//set the scroll pos
+//	if( m_GI->m_lastTopRow != m_GI->m_topRow || bScrolled == TRUE )
+//	{
+//		if(UG_SCROLLJOYSTICK == m_GI->m_vScrollMode)
+//			SetScrollPos(1,TRUE);
+//		else
+//			SetScrollPos((int)(m_GI->m_topRow * m_multiRange),TRUE);
+//
+//		m_ctrl->OnViewMoved( UG_VSCROLL, m_GI->m_lastTopRow, m_GI->m_topRow );
+//	}
+//}
 
 /***************************************************
 VScroll
@@ -145,74 +279,74 @@ Params:
 Returns:
 	<none>
 *****************************************************/
-void CUGVScroll::VScroll(UINT nSBCode, UINT nPos) 
-{
-	if(GetFocus() != m_ctrl->m_CUGGrid)
-		m_ctrl->m_CUGGrid->SetFocus();
-
-	m_ctrl->m_GI->m_moveType = 4;
-
-	switch(nSBCode)
-	{
-	case SB_LINEDOWN:
-		m_ctrl->MoveTopRow(UG_LINEDOWN);
-		break;
-	case SB_LINEUP:
-		m_ctrl->MoveTopRow(UG_LINEUP);
-		break;
-	case SB_PAGEUP:
-		m_ctrl->MoveTopRow(UG_PAGEUP);
-		break;
-	case SB_PAGEDOWN:
-		m_ctrl->MoveTopRow(UG_PAGEDOWN);
-		break;
-	case SB_TOP:
-		m_ctrl->MoveTopRow(UG_TOP);
-		break;
-	case SB_BOTTOM:
-		m_ctrl->MoveTopRow(UG_BOTTOM);
-		break;
-	case SB_THUMBTRACK:
-		if(m_GI->m_vScrollMode==UG_SCROLLTRACKING)	//tracking
-			m_ctrl->SetTopRow((long)((double)nPos * m_multiPos));
-
-		m_trackRowPos = (long)((double)nPos * m_multiPos) + m_GI->m_numLockRows;
-
-		//scroll hint window
-		#ifdef UG_ENABLE_SCROLLHINTS
-			if(m_GI->m_enableVScrollHints)
-			{
-				CString string;
-				RECT rect;
-				GetWindowRect(&rect);
-				rect.top = HIWORD(GetMessagePos());
-				m_ctrl->ScreenToClient(&rect);
-				m_ctrl->m_CUGHint->SetWindowAlign(UG_ALIGNRIGHT|UG_ALIGNVCENTER);
-				m_ctrl->m_CUGHint->SetTextAlign(UG_ALIGNCENTER);
-
-				m_ctrl->OnVScrollHint(m_trackRowPos,&string);
-				m_ctrl->m_CUGHint->SetText(string,FALSE);
-				//TD - set text before move window...
-				m_ctrl->m_CUGHint->MoveHintWindow(rect.left-1,rect.top,40);
-				m_ctrl->m_CUGHint->Show();				
-			}
-		#endif
-		break;
-	case SB_ENDSCROLL:
-		break;
-	case SB_THUMBPOSITION:
-		#ifdef UG_ENABLE_SCROLLHINTS
-			if(m_GI->m_enableVScrollHints)
-				m_ctrl->m_CUGHint->Hide();				
-		#endif
-
-		m_ctrl->SetTopRow((long)((double)nPos * m_multiPos));
-
-		break;
-	}
-
-	m_ctrl->m_CUGSideHdg->Invalidate();
-}
+//void CUGVScroll::VScroll(UINT nSBCode, UINT nPos) 
+//{
+//	if(GetFocus() != m_ctrl->m_CUGGrid)
+//		m_ctrl->m_CUGGrid->SetFocus();
+//
+//	m_ctrl->m_GI->m_moveType = 4;
+//
+//	switch(nSBCode)
+//	{
+//	case SB_LINEDOWN:
+//		m_ctrl->MoveTopRow(UG_LINEDOWN);
+//		break;
+//	case SB_LINEUP:
+//		m_ctrl->MoveTopRow(UG_LINEUP);
+//		break;
+//	case SB_PAGEUP:
+//		m_ctrl->MoveTopRow(UG_PAGEUP);
+//		break;
+//	case SB_PAGEDOWN:
+//		m_ctrl->MoveTopRow(UG_PAGEDOWN);
+//		break;
+//	case SB_TOP:
+//		m_ctrl->MoveTopRow(UG_TOP);
+//		break;
+//	case SB_BOTTOM:
+//		m_ctrl->MoveTopRow(UG_BOTTOM);
+//		break;
+//	case SB_THUMBTRACK:
+//		if(m_GI->m_vScrollMode==UG_SCROLLTRACKING)	//tracking
+//			m_ctrl->SetTopRow((long)((double)nPos * m_multiPos));
+//
+//		m_trackRowPos = (long)((double)nPos * m_multiPos) + m_GI->m_numLockRows;
+//
+//		//scroll hint window
+//		#ifdef UG_ENABLE_SCROLLHINTS
+//			if(m_GI->m_enableVScrollHints)
+//			{
+//				CString string;
+//				RECT rect;
+//				GetWindowRect(&rect);
+//				rect.top = HIWORD(GetMessagePos());
+//				m_ctrl->ScreenToClient(&rect);
+//				m_ctrl->m_CUGHint->SetWindowAlign(UG_ALIGNRIGHT|UG_ALIGNVCENTER);
+//				m_ctrl->m_CUGHint->SetTextAlign(UG_ALIGNCENTER);
+//
+//				m_ctrl->OnVScrollHint(m_trackRowPos,&string);
+//				m_ctrl->m_CUGHint->SetText(string,FALSE);
+//				//TD - set text before move window...
+//				m_ctrl->m_CUGHint->MoveHintWindow(rect.left-1,rect.top,40);
+//				m_ctrl->m_CUGHint->Show();				
+//			}
+//		#endif
+//		break;
+//	case SB_ENDSCROLL:
+//		break;
+//	case SB_THUMBPOSITION:
+//		#ifdef UG_ENABLE_SCROLLHINTS
+//			if(m_GI->m_enableVScrollHints)
+//				m_ctrl->m_CUGHint->Hide();				
+//		#endif
+//
+//		m_ctrl->SetTopRow((long)((double)nPos * m_multiPos));
+//
+//		break;
+//	}
+//
+//	m_ctrl->m_CUGSideHdg->Invalidate();
+//}
 
 /***************************************************
 OnRButtonDown
