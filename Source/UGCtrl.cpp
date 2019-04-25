@@ -979,6 +979,8 @@ void CUGCtrl::CalcTopRow(){
 	//calc the max top row
 	long row;
 	int height = m_GI->m_gridHeight - m_GI->m_lockRowHeight;
+    if (m_GI->m_enableOverVScroll)
+		height = m_GI->m_lockRowHeight + m_GI->m_defRowHeight;
 	m_GI->m_maxTopRow = m_GI->m_numLockRows;
 	for(row = m_GI->m_numberRows; row >= 0; row--){
 		height -= GetRowHeight(row);
