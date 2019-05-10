@@ -98,8 +98,7 @@ public:
 	virtual BOOL OnMouseMove(int col,long row,POINT *point,UINT flags);
 	virtual void OnKillFocus(int col,long row,CUGCell *cell);
 	virtual void OnDraw(CDC *dc,RECT *rect,int col,long row,CUGCell *cell,int selected,int current);
-    int GetListBoxSelect();
-    CString GetListBoxSelectStr();
+    CUGLstBox* GetListBox();
 };
 
 #endif //#ifndef _UGDLType_H_
