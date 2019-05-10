@@ -784,3 +784,21 @@ int CUGDropListType::GetMaxStringWidth(const CStringList& list) const
 
 	return maxWidth + 10; // + a bit to stop clipping
 }
+
+int CUGDropListType::GetListBoxSelect() {
+    if (::IsWindow(m_listBox->GetSafeHwnd()))
+    {
+        return m_listBox->GetCurSel();
+    }
+    return -1;   //listbox已经被释放则为-1
+}
+
+CString CUGDropListType::GetListBoxSelectStr() {
+    if (::IsWindow(m_listBox->GetSafeHwnd()))
+    {
+        CString string;
+        m_listBox->GetText(m_listBox->GetCurSel(), string);
+        return string;
+    }
+    return "";   //listbox已经被释放则为""
+}

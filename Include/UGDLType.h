@@ -4,7 +4,7 @@
 	Source file : UGDLType.cpp
 	Header file : UGDLType.h
 // This software along with its related components, documentation and files ("The Libraries")
-// is © 1994-2007 The Code Project (1612916 Ontario Limited) and use of The Libraries is
+// is ?1994-2007 The Code Project (1612916 Ontario Limited) and use of The Libraries is
 // governed by a software license agreement ("Agreement").  Copies of the Agreement are
 // available at The Code Project (www.codeproject.com), as part of the package you downloaded
 // to obtain this file, or directly from our office.  For a copy of the license governing
@@ -98,6 +98,8 @@ public:
 	virtual BOOL OnMouseMove(int col,long row,POINT *point,UINT flags);
 	virtual void OnKillFocus(int col,long row,CUGCell *cell);
 	virtual void OnDraw(CDC *dc,RECT *rect,int col,long row,CUGCell *cell,int selected,int current);
+    int GetListBoxSelect();
+    CString GetListBoxSelectStr();
 };
 
 #endif //#ifndef _UGDLType_H_
