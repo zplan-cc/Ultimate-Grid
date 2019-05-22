@@ -29,7 +29,6 @@ CUGVScroll::CUGVScroll()
 	m_lastScrollMode = -2;
 	m_lastNumLockRow = -2;
 	m_trackRowPos = 0;
-    is_force_update_scroll_info_ = false;
 }
 
 CUGVScroll::~CUGVScroll()
@@ -72,6 +71,7 @@ void CUGVScroll::Moved() {
   int top_row_pos = 0;
   int max_top_row_pos = 0;
 
+  size_t old_visible_row_nums = visible_rows_.size();
   visible_rows_.resize(0);
   visible_rows_.reserve(m_GI->m_numberRows);
   for (int i = 0; i < m_GI->m_numberRows; ++i) {
@@ -81,11 +81,10 @@ void CUGVScroll::Moved() {
   }
 
   // set the scroll range
-  if (is_force_update_scroll_info_ || m_lastMaxTopRow != m_GI->m_maxTopRow ||
+  if (old_visible_row_nums != visible_rows_.size() || m_lastMaxTopRow != m_GI->m_maxTopRow ||
       m_lastScrollMode != m_GI->m_vScrollMode ||
       m_lastNumLockRow != m_GI->m_numLockRows) {
     // set the last value vars
-    is_force_update_scroll_info_ = false;
     m_lastMaxTopRow = m_GI->m_maxTopRow;
     m_lastScrollMode = m_GI->m_vScrollMode;
     m_lastNumLockRow = m_GI->m_numLockRows;
