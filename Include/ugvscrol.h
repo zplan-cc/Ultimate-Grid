@@ -71,7 +71,7 @@ protected:
 	std::vector<int> visible_rows_;
 
 public:
-
+    bool is_force_update_scroll_info_;
 	//internal functions
 	void Update();
 	void Moved();
