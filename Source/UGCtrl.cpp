@@ -1026,16 +1026,19 @@ void CUGCtrl::CalcLeftCol(){
 	int col;
 	int width = m_GI->m_gridWidth - m_GI->m_lockColWidth;
 	m_GI->m_maxLeftCol = m_GI->m_numLockCols;
-	for(col = m_GI->m_numberCols ; col >= 0; col --){
-		width -= GetColWidth(col);
-		if(width <0){
-			m_GI->m_maxLeftCol = col+1;
-			if( m_GI->m_maxLeftCol >= m_GI->m_numberCols)
-				m_GI->m_maxLeftCol = m_GI->m_numberCols -1;
-			break;
-		}
-	}
-	
+    if (m_GI->m_gridWidth > 0)
+    {
+        for(col = m_GI->m_numberCols; col >= 0; col--){
+            width -= GetColWidth(col);
+            if(width <0){
+                m_GI->m_maxLeftCol = col+1;
+                if( m_GI->m_maxLeftCol >= m_GI->m_numberCols)
+                    m_GI->m_maxLeftCol = m_GI->m_numberCols -1;
+                break;
+            }
+        }
+    }
+
 	//check to make sure the values are not below 0
 	if(m_GI->m_maxLeftCol < m_GI->m_numLockCols)
 		m_GI->m_maxLeftCol = m_GI->m_numLockCols;
