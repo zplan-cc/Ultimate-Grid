@@ -451,7 +451,11 @@ int CUGCtrl::EditCtrlFinished(LPCTSTR string,BOOL cancelFlag,
 				editCell.SetText( string );
 			}
 
-			SetCell( m_editCol, m_editRow, &editCell );
+			if (UG_ERROR == SetCell(m_editCol, m_editRow, &editCell)) 
+			{
+				continueRow = m_editRow;
+                continueCol = m_editCol;
+            }
 		}
 
 		// If the newly edited string is larger than its column's
@@ -495,7 +499,7 @@ int CUGCtrl::EditCtrlFinished(LPCTSTR string,BOOL cancelFlag,
 		m_editInProgress = FALSE;
 
 		//check to see if editing continues in a new cell
-		if(continueFlag && m_editParent == m_CUGGrid){
+        if (continueFlag && m_editParent == m_CUGGrid) {
 
 			// adjust target continue cell if cell part of a join
 			int startCol, endCol;
@@ -2847,12 +2851,13 @@ int	CUGCtrl::SetCell(int col,long row,CUGCell *cell){
 
 	//set the cell in the datasource
 	//get the cell from the datasource
+	int res;
 	if(col >=0)
-		ds->SetCell(m_GI->m_colInfo[col].colTranslation,row,cell);
+		res = ds->SetCell(m_GI->m_colInfo[col].colTranslation,row,cell);
 	else
-		ds->SetCell(col,row,cell);
+		res = ds->SetCell(col,row,cell);
 
-	return UG_SUCCESS;
+	return res;
 }
 
 /***************************************************
