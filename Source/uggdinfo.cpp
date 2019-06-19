@@ -153,7 +153,7 @@ CUGGridInfo::CUGGridInfo()
 	m_CUGOverlay		= new CUGPtrList;
 
 	//default border pen - used when using excel style borders
-	m_defBorderPen =		new CPen(PS_SOLID,1,RGB(220,220,220));
+	m_defBorderPen =		new CPen(PS_SOLID,1,RGB(212,212,212));
 
 	m_trackingWndMode = 0;	//normal mode 1-stay close
 
