@@ -420,9 +420,6 @@ int CUGCtrl::EditCtrlFinished(LPCTSTR string,BOOL cancelFlag,
      //call the OnEditFinished notify
 	 if( OnEditFinish(m_editCol,m_editRow,m_editCtrl,string,cancelFlag) != FALSE)
 	 {
-		//hide the edit control
-		m_editCtrl->ShowWindow(SW_HIDE);
-
 		//save the info
 		if(!cancelFlag)
 		{
@@ -451,12 +448,12 @@ int CUGCtrl::EditCtrlFinished(LPCTSTR string,BOOL cancelFlag,
 				editCell.SetText( string );
 			}
 
-			if (UG_ERROR == SetCell(m_editCol, m_editRow, &editCell)) 
-			{
-				continueRow = m_editRow;
-                continueCol = m_editCol;
-            }
+			if(UG_ERROR == SetCell(m_editCol, m_editRow, &editCell))
+				return FALSE;
 		}
+		
+		// hide the edit control
+        m_editCtrl->ShowWindow(SW_HIDE);
 
 		// If the newly edited string is larger than its column's
 		// width and the cell overlapping is enabled, but edit control
