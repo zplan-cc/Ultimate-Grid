@@ -38,6 +38,7 @@ CUGDropListType::CUGDropListType()
 
 	// create the list control
 	m_listBox = new CUGLstBox;
+    rect_brush_ = NULL;
 	// make sure that this cell types do not overlap
 	m_canOverLap = FALSE;
 	m_useThemes = true;
@@ -50,6 +51,7 @@ CUGDropListType::CUGDropListType()
 CUGDropListType::~CUGDropListType()
 {
 	// clean up, delete the listbox object
+    rect_brush_ = NULL;
 	delete m_listBox;
 }
 
@@ -487,7 +489,13 @@ void CUGDropListType::OnDraw(CDC *dc,RECT *rect,int col,long row,CUGCell *cell,i
 		}
 
 		//fill the border in
-		dc->FillRect(&rectout,&m_brush);
+        if (rect_brush_ != NULL){
+            dc->FillRect(&rectout, rect_brush_);
+        }
+        else {
+            dc->FillRect(&rectout, &m_brush);
+        }
+		
 		
 		//make a line to separate the border from the rest ofthe cell
 		oldpen = (CPen *)dc->SelectObject((CPen *)&m_pen);
@@ -787,4 +795,7 @@ int CUGDropListType::GetMaxStringWidth(const CStringList& list) const
 
 CUGLstBox* CUGDropListType::GetListBox() {
     return m_listBox;
+}
+void CUGDropListType::SetRectColor(CBrush* brush) {
+   rect_brush_ = brush;
 }

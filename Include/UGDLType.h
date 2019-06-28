@@ -74,6 +74,7 @@ protected:
 
 	CPen		m_pen;
 	CBrush		m_brush;
+    CBrush*     rect_brush_;
 	CUGLstBox*	m_listBox;
 
 	int StartDropList();
@@ -99,6 +100,7 @@ public:
 	virtual void OnKillFocus(int col,long row,CUGCell *cell);
 	virtual void OnDraw(CDC *dc,RECT *rect,int col,long row,CUGCell *cell,int selected,int current);
     CUGLstBox* GetListBox();
+    virtual void SetRectColor(CBrush* brush);
 };
 
 #endif //#ifndef _UGDLType_H_
