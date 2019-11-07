@@ -101,6 +101,8 @@ public:
 	virtual void OnDraw(CDC *dc,RECT *rect,int col,long row,CUGCell *cell,int selected,int current);
     CUGLstBox* GetListBox();
     virtual void SetRectColor(CBrush* brush);
+	static int GetCurSel(CUGCtrl* ctrl, CUGCell* cell);
+	static int GetCount(CUGCtrl* ctrl, CUGCell* cell);
 };
 
 #endif //#ifndef _UGDLType_H_

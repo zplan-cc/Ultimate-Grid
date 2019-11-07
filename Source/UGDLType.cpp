@@ -799,3 +799,27 @@ CUGLstBox* CUGDropListType::GetListBox() {
 void CUGDropListType::SetRectColor(CBrush* brush) {
    rect_brush_ = brush;
 }
+
+int CUGDropListType::GetCurSel(CUGCtrl * ctrl, CUGCell * cell) {
+	CUGDropListType* drop_list_type = dynamic_cast<CUGDropListType*>(ctrl->GetCellType(cell->GetCellType()));
+	if (nullptr == drop_list_type) {
+		return UG_CLASS_MISMATCH;
+	}
+	auto edit_control = drop_list_type->GetListBox();
+	if (NULL == edit_control->m_hWnd) {
+		return UG_NO_CTRL;
+	}
+	return edit_control->GetCurSel();
+}
+
+int CUGDropListType::GetCount(CUGCtrl * ctrl, CUGCell * cell){
+	CUGDropListType* drop_list_type = dynamic_cast<CUGDropListType*>(ctrl->GetCellType(cell->GetCellType()));
+	if (nullptr == drop_list_type) {
+		return UG_CLASS_MISMATCH;
+	}
+	auto edit_control = drop_list_type->GetListBox();
+	if (NULL == edit_control->m_hWnd) {
+		return UG_NO_CTRL;
+	}
+	return edit_control->GetCount();
+}
