@@ -275,6 +275,14 @@ void CUGNoteType::OnDraw(CDC *dc,RECT *rect,int col,long row,
 		}
 	}
 }
+void CUGNoteType::CloseNote(int col, long row, CUGCtrl* ctrl)
+{
+    auto cell_type = ctrl->GetCellType(col,row);
+    if (typeid(*cell_type) == typeid(CUGNoteType)) {
+        auto note_type = static_cast<CUGNoteType*>(cell_type);
+        note_type->GetNoteWnd()->ShowWindow(SW_HIDE);
+    }
+}
 
 /***************************************************
 TimerProc
