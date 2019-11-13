@@ -103,11 +103,13 @@ int CUGCell::SetDefaultInfo()
 						UGCELL_XP_STYLE_SET |
 						UGCELL_ALIGNMENT_SET;
 
+	zero_as_24_ = false;
+	date_only_ = false;
+
 	m_string		= _T("");
 	m_mask			= _T("");
 	m_label			= _T("");
 	m_format		= NULL;
-    m_timeformat    = _T("");
 	m_cellStyle		= NULL;
 	m_cellInitialState = NULL;
 	// numberic datatype specific information
@@ -249,6 +251,9 @@ int CUGCell::AddCellInfo(CUGCell *src,CUGCell *dest)
 
 	//property flags
 	dest->m_propSetFlags |= src->m_propSetFlags;
+
+	dest->zero_as_24_ = src->zero_as_24_;
+	dest->date_only_ = src->date_only_;
 
 	//String 
 	if(src->m_propSetFlags&UGCELL_STRING_SET)
@@ -935,23 +940,186 @@ SetTime
 		UG_SUCCESS	success
 		UG_ERROR	fail
 *********************************************/
+time_t BuildTime(int year, int month, int day, int hour, int minute,int second = 0) 
+{
+	time_t t = CTime(year, month, day, hour, minute, second).GetTime();
+
+	time_t utc_time = 0;
+	int time_zone = 0;  //当前系统所在的时区
+	std::tm local_tm;
+	localtime_s(&local_tm, &utc_time);
+	time_zone = (local_tm.tm_hour > 12) ? (local_tm.tm_hour -= 24) : local_tm.tm_hour;
+	
+	return t + time_zone * 3600;
+}
+
+bool TimeFormat(CTime time, CString& sOutputString, bool bStop, bool only_show_date) {
+	if (time <= 0)  //时间为初始时间时显示空格字符
+	{
+		sOutputString = _T("");
+		return false;
+	}
+
+	tm ltm;
+	if (bStop && (time.GetTime() % (3600 * 24)==0))  //完成时间零点时刻显示为前一天24：00
+	{
+		time -= CTimeSpan(0, 1, 0, 0);
+		time.GetGmtTm(&ltm);
+		ltm.tm_hour += 1;
+	}
+	else {
+		time.GetGmtTm(&ltm);
+	}
+	sOutputString.Format(_T("%4d-%02d-%02d"), 1900 + ltm.tm_year, ltm.tm_mon + 1, ltm.tm_mday);
+	if (!only_show_date)
+		sOutputString.AppendFormat(_T(" %02d:%02d"), ltm.tm_hour, ltm.tm_min);
+	return true;
+}
+
+bool TimeParse(const CString& sInputString, time_t& time, bool is_stop) {
+	int i;
+	bool HasHours = true;
+	int iStringLength = sInputString.GetLength();
+
+	int iDividePos = sInputString.Find(L"-");
+	if (iDividePos == -1)
+		return false;
+
+	wchar_t sYear[20], sMonth[20], sDay[20], sHour[20], sMin[20];
+	for (i = 0; i < iDividePos; i++)
+		sYear[i] = sInputString[i];
+	sYear[i] = NULL;
+
+	for (iDividePos++; iDividePos < iStringLength; iDividePos++)
+		if (sInputString[iDividePos] == '-')
+			break;
+	if (iDividePos == iStringLength)
+		return false;
+
+	int k = i + 1;
+	for (i = k; i < iDividePos; i++)
+		sMonth[i - k] = sInputString[i];
+	sMonth[i - k] = NULL;
+
+	for (iDividePos++; iDividePos < iStringLength; iDividePos++)
+		if (sInputString[iDividePos] == ' ')
+			break;
+	if (iDividePos == iStringLength)
+		HasHours = false;
+
+	k = i + 1;
+	for (i = k; i < iDividePos; i++)
+		sDay[i - k] = sInputString[i];
+	sDay[i - k] = NULL;
+
+	if (HasHours) {
+		for (iDividePos++; iDividePos < iStringLength; iDividePos++)
+			if (sInputString[iDividePos] == ':')
+				break;
+		k = i + 1;
+		for (i = k; i < iDividePos; i++)
+			sHour[i - k] = sInputString[i];
+		sHour[i - k] = NULL;
+
+		if (iDividePos == iStringLength) {
+			sMin[0] = 0;
+		}
+		else {
+			k = i + 1;
+			for (i = k; i < iStringLength; i++)
+				sMin[i - k] = sInputString[i];
+			sMin[i - k] = NULL;
+		}
+	}
+
+	if (wcslen(sDay) == 0)
+		return FALSE;
+	if (wcslen(sMonth) == 0)
+		return FALSE;
+	if (wcslen(sYear) == 0)
+		return FALSE;
+
+	int iYear = _wtoi(sYear);
+	int iMonth = _wtoi(sMonth);
+	int iDay = _wtoi(sDay);
+
+	int iHour = 0, iMin = 0;
+	bool is_stop_time = false;
+	if (HasHours) {
+		iHour = _wtoi(sHour);
+		iMin = _wtoi(sMin);
+	}
+	if ((iHour == 24) && (iMin == 0)) {
+		is_stop_time = true;
+		iHour = 0;
+	}
+	if ((iYear <= 1970) || (iYear > 3000))
+		return FALSE;
+	if ((iMonth < 1) || (iMonth > 12))
+		return FALSE;
+	if ((iDay < 1) || (iDay > 31))
+		return FALSE;
+	if ((iHour < 0) || (iHour > 23))
+		return FALSE;
+	if ((iMin < 0) || (iMin > 59))
+		return FALSE;
+
+	time = BuildTime(iYear, iMonth, iDay, iHour, iMin);
+
+	if (is_stop_time)
+		time += CTimeSpan(1, 0, 0, 0).GetTimeSpan();
+	if (!HasHours && is_stop) {
+		time += CTimeSpan(1, 0, 0, 0).GetTimeSpan();
+	}
+	return TRUE;
+}
+
 int	CUGCell::SetTime(int second,int minute,int hour,int day,int month,int year)
 {
 	// populate the datetime structure with the information passed in
-	COleDateTime odt;
-	odt.SetDateTime(year,month,day,hour,minute,second);
+	time_t t = BuildTime(year, month, day, hour, minute, second);
+	return SetTime(t);
+}
+
+int CUGCell::SetTime(time_t time)
+{
+	CTime t = time;
 	// set the display string
-    if (m_timeformat == _T(""))
-        SetText(odt.Format());  // use default of LANG_USER_DEFAULT
-    else
-        SetText(odt.Format(m_timeformat));
+	CString str;
+	TimeFormat(t, str, zero_as_24_, date_only_);
+	SetText(str);  // use default of LANG_USER_DEFAULT
 	// store the native form of the date
-	m_nNumber = odt;
+	m_nNumber = time;
 
 	m_dataType	= UGCELLDATA_TIME;
-	m_propSetFlags |= (UGCELL_STRING_SET + UGCELL_DATATYPE_SET);
+	m_propSetFlags |= (UGCELL_STRING_SET | UGCELL_DATATYPE_SET);
 
 	return UG_SUCCESS;
+}
+
+int CUGCell::SetDateAndKeepTime(int year,int month,int day)
+{
+	time_t time;
+	int hour, minute;
+	if (m_dataType == UGCELLDATA_TIME)
+	{
+		tm ltm;
+		CTime time_before = m_nNumber;
+		time_before.GetGmtTm(&ltm);
+		hour = ltm.tm_hour;
+		minute = ltm.tm_min;
+	}
+	else
+	{
+		hour = 0;
+		minute = 0;
+	}
+	time = BuildTime(year, month, day, hour, minute);
+	//存储的是24点的情况
+	if (zero_as_24_ && (hour == 0) && (minute == 0))
+		time += CTimeSpan(1, 0, 0, 0).GetTimeSpan();
+
+	return SetTime(time);
 }
 /********************************************
 GetTime
@@ -973,23 +1141,38 @@ GetTime
 *********************************************/
 int	CUGCell::GetTime(int* second,int* minute,int* hour,int* day,int* month,int* year)
 {
-	COleDateTime odt;
+	time_t time;
 
-	if(m_propSetFlags&UGCELLDATA_TIME)
-		odt = m_nNumber;
+	if (m_dataType == UGCELLDATA_TIME)
+		time = m_nNumber;
 	else
 		// convert cell's string into a date fromat
-		odt.ParseDateTime(m_string);
-
-	*day = odt.GetDay();
-	*month = odt.GetMonth();
-	*year = odt.GetYear();
+		TimeParse(m_string, time, zero_as_24_);
+	
+	tm ltm;
+	CTime(time).GetGmtTm(&ltm);
+	*day = ltm.tm_mday;
+	*month = ltm.tm_mon + 1;
+	*year = ltm.tm_year + 1900;
 			
-	*second = odt.GetSecond();
-	*minute = odt.GetMinute();
-	*hour = odt.GetHour();
+	*second = ltm.tm_sec;
+	*minute = ltm.tm_min;
+	*hour = ltm.tm_hour;
 
 	return UG_SUCCESS;
+}
+
+time_t CUGCell::GetTime()
+{
+	time_t t;
+
+	if (m_dataType == UGCELLDATA_TIME)
+		t = (time_t)m_nNumber;
+	else
+		// convert cell's string into a date fromat
+		TimeParse(m_string, t, zero_as_24_);
+
+	return t;
 }
 /********************************************
 	//set and get data types
@@ -1023,12 +1206,12 @@ int	CUGCell::SetDataType(short type)
 		StringToNumber( &cellVal, &m_nNumber );
 		m_string = "";
 	}
-	else if ( type == UGCELLDATA_TIME && m_propSetFlags&UGCELL_STRING_SET )
+	else if ( type == UGCELLDATA_TIME)
 	{
 		CString cellVal = GetText();
-		COleDateTime dateTime;
-		dateTime.ParseDateTime( cellVal );
-		m_nNumber = dateTime;
+		time_t time = 0;
+		TimeParse(cellVal, time, zero_as_24_);
+		m_nNumber = time;
 	}
 	else if ( type == UGCELLDATA_CURRENCY && m_propSetFlags&UGCELL_STRING_SET )
 	{
@@ -2021,6 +2204,17 @@ int	CUGCell::SetFormatClass(CUGCellFormat *format)
 	return UG_SUCCESS;
 }
 
+void CUGCell::SetTimeMode(bool zero_as_24, bool date_only)
+{
+	zero_as_24_ = zero_as_24;
+	date_only_ = date_only;
+}
+
+void CUGCell::GetTimeMode(bool & zero_as_24, bool & date_only)
+{
+	zero_as_24 = zero_as_24_;
+	date_only = date_only_;
+}
 /********************************************
 GetFormatClass
 	Purpose

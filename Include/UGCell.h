@@ -65,6 +65,7 @@
 #define UGCELL_NUMBERDEC_SET	BIT25
 #define UGCELL_DONOT_LOCALIZE	BIT26
 #define UGCELL_XP_STYLE_SET		BIT27
+#define UGCELL_EMPTIABLE_SET	BIT28
 // TD v 7.2 - for kvt xml ds changes
 #define UGCELL_MULTIROWCELL		BIT31
 
@@ -106,8 +107,9 @@ protected:
 							//pointer to a format class
 							//to validate editing and general setting
 							//also used for diplay formating
-    CString m_timeformat;  //settime时候调用的默认format
-
+	bool zero_as_24_;		//是否将0点显示为前一天的24点
+	bool date_only_;		//是否只显示日期，不显示小时与分钟
+	
 	CUGCell * m_cellStyle;	//CUGCell *m_cellStyle;
 							//pointer to a property style cell object
 
@@ -218,7 +220,10 @@ public:
 
 	//***** Time data type functions *****
 	int		SetTime(int second,int minute,int hour,int day,int month,int year);
+	int		SetTime(time_t t);
+	int		SetDateAndKeepTime(int year,int month,int day);
 	int		GetTime(int* second,int* minute,int* hour,int* day,int* month,int* year);
+	time_t	GetTime();
 	
 	//***** set and get data types
 	int		SetDataType(short type);
@@ -271,7 +276,8 @@ public:
 
 	//formating and validation
 	int		SetFormatClass(CUGCellFormat * format);
-    void    SetTimeFormat(CString format) { m_timeformat = format; }
+	void	SetTimeMode(bool zero_as_24, bool date_only = false);
+	void	GetTimeMode(bool &zero_as_24, bool &date_only);
 	CUGCellFormat*	GetFormatClass();
 
 	int		SetCellStyle(CUGCell *cell);
