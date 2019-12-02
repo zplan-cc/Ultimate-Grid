@@ -871,10 +871,22 @@ void CUGCellType::DrawText(CDC *dc,RECT *rect,int offset,int col,long row,CUGCel
 
 	GetTextExtentPoint(dc->m_hDC,string,stringLen,&size);
 
+	CRect grid_rect;
+	m_ctrl->GetClientRect(grid_rect);
+
 	// horizontal text alignment
 	if(alignment&UG_ALIGNCENTER)
 	{
-		left = rect->left + (rect->right - rect->left - size.cx) /2;
+		
+		if (row<0 && (rect->right > grid_rect.right)) 
+		{
+			int width = grid_rect.right - rect->left - size.cx;
+			if (width > 0) {
+				left = rect->left + width / 2;
+			}
+		}else
+			left = rect->left + (rect->right - rect->left - size.cx) / 2;
+		
 	}
 	else if(alignment&UG_ALIGNRIGHT)
 	{
