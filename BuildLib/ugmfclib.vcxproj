@@ -769,6 +769,8 @@
     </Bscmake>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\CellTypes\UGCTNote.cpp" />
+    <ClCompile Include="..\CellTypes\ugctnotewnd.cpp" />
     <ClCompile Include="..\Source\UGCBType.cpp" />
     <ClCompile Include="..\Source\UGCell.cpp" />
     <ClCompile Include="..\Source\UGCelTyp.cpp" />
@@ -818,6 +820,8 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\CellTypes\UGCTNote.h" />
+    <ClInclude Include="..\CellTypes\ugctnotewnd.h" />
     <ClInclude Include="..\Include\UGCBType.h" />
     <ClInclude Include="..\Include\UGCell.h" />
     <ClInclude Include="..\Include\UGCelTyp.h" />

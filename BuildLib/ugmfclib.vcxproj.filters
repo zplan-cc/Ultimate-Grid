@@ -101,6 +101,12 @@
     <ClCompile Include="StdAfx.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="..\CellTypes\UGCTNote.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\CellTypes\ugctnotewnd.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Include\UGCBType.h">
@@ -191,6 +197,12 @@
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="StdAfx.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CellTypes\UGCTNote.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CellTypes\ugctnotewnd.h">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>
