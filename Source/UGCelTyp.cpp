@@ -924,7 +924,7 @@ void CUGCellType::DrawText(CDC *dc,RECT *rect,int offset,int col,long row,CUGCel
 			CRect tempRect(rect);
 
 			// set up a default format
-			UINT format = DT_WORDBREAK | DT_NOPREFIX;
+			UINT format = DT_WORDBREAK | DT_NOPREFIX | DT_EDITCONTROL;
 
 			// v7.2 - update 03 - changes here to respect bottom and center
 			//        alignment settings for multi-line cells - 
