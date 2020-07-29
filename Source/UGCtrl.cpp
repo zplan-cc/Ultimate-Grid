@@ -444,6 +444,10 @@ int CUGCtrl::EditCtrlFinished(LPCTSTR string,BOOL cancelFlag,
 				editCell.SetText( string );
 				editCell.SetDataType( UGCELLDATA_CURRENCY );
 				break;
+			case UGCELLRANGE_DATA_TIME:
+				editCell.SetText( string );
+				editCell.SetDataType( UGCELLRANGE_DATA_TIME );
+				break;
 			default:
 				editCell.SetText( string );
 			}

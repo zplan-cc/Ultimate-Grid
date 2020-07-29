@@ -4,7 +4,7 @@
 	Source file : UGCTdtp.cpp
 	Header file : UGCTdtp.h
 // This software along with its related components, documentation and files ("The Libraries")
-// is © 1994-2007 The Code Project (1612916 Ontario Limited) and use of The Libraries is
+// is ?1994-2007 The Code Project (1612916 Ontario Limited) and use of The Libraries is
 // governed by a software license agreement ("Agreement").  Copies of the Agreement are
 // available at The Code Project (www.codeproject.com), as part of the package you downloaded
 // to obtain this file, or directly from our office.  For a copy of the license governing
@@ -122,6 +122,7 @@ typedef struct UG_CLASS_DECL _tagUGCTMONTHCALSETTINGS
 
 class UG_CLASS_DECL CUGCTDateTimePicker: public CUGCellType
 {
+protected:
 	// width of the dropdown button
 	int		m_btnWidth;
 	// internal flag. Set to TRUE if dropdown button is currently pressed
@@ -213,6 +214,22 @@ public:
 		CSize szMargins=CSize(0,0));
 	static BOOL GetMonthCalReqRect(CMonthCalCtrl* pMonthCal, RECT* pRect, 
 		CSize szDimension);
+};
+
+class UG_CLASS_DECL CUGCTRangeDateTimePicker: public CUGCTDateTimePicker
+{
+protected:
+	// displays month calendar for current cell
+	int DisplayMonthCalendar();
+public:
+	CUGCTRangeDateTimePicker();
+	int	SetTheOtherTime(CTime t,bool is_other_stop);
+	virtual LPCTSTR GetName();
+	virtual BOOL OnLClicked(int col,long row,int updn,RECT *rect,POINT *point);
+	virtual BOOL OnDClicked(int col,long row,RECT *rect,POINT *point);
+	virtual BOOL OnKeyDown(int col,long row,UINT *vcKey);
+public:
+	CTime the_other_time_;
 };
 #endif	//_MFC_VER>0x0421
 #endif  //#ifndef _UGCTdtp_H_

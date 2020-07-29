@@ -3,7 +3,7 @@
 **************************************************************************
 	Source file : UGCTdtp.cpp
 // This software along with its related components, documentation and files ("The Libraries")
-// is © 1994-2007 The Code Project (1612916 Ontario Limited) and use of The Libraries is
+// is ?1994-2007 The Code Project (1612916 Ontario Limited) and use of The Libraries is
 // governed by a software license agreement ("Agreement").  Copies of the Agreement are
 // available at The Code Project (www.codeproject.com), as part of the package you downloaded
 // to obtain this file, or directly from our office.  For a copy of the license governing
@@ -15,8 +15,9 @@
 #if _MFC_VER>0x0421
 
 #include <winuser.h>
-#include "UGCtrl.h"
+#include "../Include/UGCtrl.h"
 #include "UGCTdtp.h"
+#include "view/control/z_datetime_ctrl.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -390,10 +391,26 @@ int CUGCTDateTimePicker::DisplayMonthCalendar()
 	CUGCell cell;
 	m_ctrl->GetCellIndirect(m_ctrl->GetCurrentCol(),m_ctrl->GetCurrentRow(),&cell);
 
-	CString sText=cell.GetText();
 	COleDateTime date;
-	ConvertStringToDate(sText,date);
-
+	if (!CString(cell.GetText()).IsEmpty() && cell.GetDataType() == UGCELLDATA_TIME)
+	{
+		int year, month, day, hour, minute, second;
+		bool zero_as_24, date_only;
+		cell.GetTime(&second, &minute, &hour, &day, &month, &year);
+		date.SetDate(year, month, day);
+		cell.GetTimeMode(zero_as_24, date_only);
+		if (zero_as_24 && hour==0 && minute==0 && second==0)
+		{
+			date -= COleDateTimeSpan(1, 0, 0, 0);
+		}
+	}
+	else
+	{
+		//Èç¹û¸ñ×ÓÀïÃ»ÓÐÎÄ×ÖÊ±
+		//µ±×´Ì¬ÎªinvalidÊ±£¬ÈÕÀú¿Ø¼þ»áÌø×ªµ½½ñÌì
+		date.SetStatus(COleDateTime::invalid);
+	}
+	
 	if(cell.GetParam())
 	{
 		cell.SetParam(FALSE);
@@ -424,7 +441,7 @@ int CUGCTDateTimePicker::DisplayMonthCalendar()
 	mcs.nFirstDayOfWeek=wndMonthCal.GetFirstDayOfWeek();
 	mcs.nFlags=wndMonthCal.GetStyle()&(MCS_WEEKNUMBERS|MCS_NOTODAYCIRCLE|MCS_NOTODAY);
 	mcs.nScrollRate=wndMonthCal.GetMonthDelta();
-	mcs.szDimension=CSize(1,1);
+	mcs.szDimension=CSize(2,1);
 	mcs.dateCur=date;
 	CFont* pFont=wndMonthCal.GetFont();
 	ASSERT(pFont!=NULL);
@@ -451,8 +468,11 @@ int CUGCTDateTimePicker::DisplayMonthCalendar()
 	CRect rect;
 	wndMonthCal.GetWindowRect(rect);
 	AdjustMonthCalPosition(rect);
-	wndMonthCal.SetWindowPos(NULL,rect.left,rect.top,rect.Width(),rect.Height(),
-		SWP_NOZORDER);
+    if (rect.top >= rectCell.bottom)
+		wndMonthCal.SetWindowPos(NULL,rect.left ,rect.top,rect.Width(),rect.Height(), SWP_NOZORDER);
+	else
+		wndMonthCal.SetWindowPos(NULL, rect.left - rect.Width() + rectCell.Width() - 20, rect.top,
+			                     rect.Width(), rect.Height(), SWP_NOZORDER);
 
 	wndMonthCal.SetCurSel(mcs.dateCur);
 
@@ -493,7 +513,7 @@ int CUGCTDateTimePicker::DisplayMonthCalendar()
 			nState=2;
 		}
 
-		if(msg.message==WM_LBUTTONUP && msg.hwnd==wndMonthCal.GetSafeHwnd())
+		if (msg.message == WM_LBUTTONUP && msg.hwnd == wndMonthCal.GetSafeHwnd() && wndMonthCal.IsMonthView())
 		{
 			POINTS points=MAKEPOINTS(msg.lParam);	
 			CPoint pt(points.x,points.y);
@@ -540,7 +560,7 @@ int CUGCTDateTimePicker::DisplayMonthCalendar()
 		ConvertDateToString(date,cd.string);
 		OnCellTypeNotify(m_ID,m_ctrl->GetCurrentCol(),
 			m_ctrl->GetCurrentRow(),UGCT_CONVERTDATE,(LPARAM)&cd);
-		cell.SetText(cd.string);
+		cell.SetDateAndKeepTime(date.GetYear(), date.GetMonth(), date.GetDay());
 		m_ctrl->SetCell(m_ctrl->GetCurrentCol(),m_ctrl->GetCurrentRow(),&cell);
 		m_ctrl->RedrawCell(m_ctrl->GetCurrentCol(),m_ctrl->GetCurrentRow());
 	}
@@ -753,5 +773,323 @@ void CUGCTDateTimePicker::GetBestSize(CDC *dc,CSize *size,CUGCell *cell)
 		size->cx += m_btnWidth;
 	}
 }
+CUGCTRangeDateTimePicker::CUGCTRangeDateTimePicker():CUGCTDateTimePicker()
+{
+	the_other_time_ = 0;
+}
 
-#endif	//	_MFC_VER>0x0421
+int CUGCTRangeDateTimePicker::SetTheOtherTime(CTime time,bool is_other_stop)
+{
+	if(time == 0)
+		the_other_time_ = 0;
+	else
+	{
+		tm t;
+		time.GetGmtTm(&t);
+		the_other_time_ = CTime(t.tm_year + 1900, t.tm_mon + 1, t.tm_mday, t.tm_hour, t.tm_min, t.tm_sec);
+		if (is_other_stop && t.tm_hour == 0 && t.tm_min == 0 && t.tm_sec== 0) {
+			the_other_time_ -= CTimeSpan(1, 0, 0, 0);
+		} 
+	}
+	return UG_SUCCESS;
+}
+LPCTSTR CUGCTRangeDateTimePicker::GetName()
+{
+	return _T("Range-Date-Time Picker");
+}
+BOOL CUGCTRangeDateTimePicker::OnDClicked(int col,long row,RECT *rect,POINT *point){
+
+	return OnLClicked(col,row,1,rect,point);
+}
+/***************************************************
+OnLClicked - overloaded CUGCellType::OnLClicked
+
+    **See CUGCellType::OnLClicked for more details
+	about this function
+****************************************************/
+BOOL CUGCTRangeDateTimePicker::OnLClicked(int col,long row,int updn,
+									 RECT *rect,POINT *point)
+{
+	// v7.2 - update 01 - make sure that the read only cells do not
+	// show calendar - submitted by mhorowit
+	CUGCell cell;
+	m_ctrl->GetCellIndirect(col,row,&cell);
+
+	if ( cell.GetReadOnly() == TRUE )
+		return UG_SUCCESS;
+
+	if(updn)
+	{
+		if(point->x > (rect->right - m_btnWidth))
+		{			
+			//copy the droplist button co-ords
+			CopyRect(&m_btnRect,rect);
+			m_btnRect.left = rect->right - m_btnWidth;
+		
+			//redraw the button
+			m_btnDown = TRUE;
+			m_btnCol = col;
+			m_btnRow = row;
+			m_ctrl->RedrawCell(m_btnCol,m_btnRow);
+
+			//start the drop list
+			DisplayMonthCalendar();
+			return FALSE;
+		}
+		else if(m_btnCol ==-2)
+		{
+			m_btnCol = -1;
+			m_btnRow = -1;			
+			return FALSE;
+		}
+	}
+	else if(m_btnDown)
+	{		
+		m_btnDown = FALSE;
+		m_ctrl->RedrawCell(col,row);
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
+BOOL CUGCTRangeDateTimePicker::OnKeyDown(int col,long row,UINT *vcKey){
+
+	// v7.2 - update 01 - make sure that the read only cells do not
+	// show calendar - submitted by mhorowit
+	CUGCell cell;
+	m_ctrl->GetCellIndirect(col,row,&cell);
+
+	if ( cell.GetReadOnly() == TRUE )
+		return UG_SUCCESS;
+
+	if(*vcKey==VK_RETURN)
+	{
+		DisplayMonthCalendar();
+		*vcKey =0;
+		return TRUE;
+	}
+	if(*vcKey==VK_DOWN)
+	{
+		if(GetKeyState(VK_CONTROL) <0)
+		{
+			DisplayMonthCalendar();
+			*vcKey =0;
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+
+int CUGCTRangeDateTimePicker::DisplayMonthCalendar() {
+	CUGCell cell;
+	m_ctrl->GetCellIndirect(m_ctrl->GetCurrentCol(),m_ctrl->GetCurrentRow(),&cell);
+
+	COleDateTime date;
+	if (!CString(cell.GetText()).IsEmpty() && cell.GetDataType() == UGCELLRANGE_DATA_TIME)
+	{
+		int year, month, day, hour, minute, second;
+		bool zero_as_24, date_only;
+		cell.GetTime(&second, &minute, &hour, &day, &month, &year);
+		date.SetDate(year, month, day);
+		cell.GetTimeMode(zero_as_24, date_only);
+		if (zero_as_24 && hour==0 && minute==0 && second==0)
+		{
+			date -= COleDateTimeSpan(1, 0, 0, 0);
+		}
+	}
+	else
+	{
+		//??????????
+		//????invalid????????????
+		date.SetStatus(COleDateTime::invalid);
+	}
+	
+	if(cell.GetParam())
+	{
+		cell.SetParam(FALSE);
+		m_ctrl->SetCell(m_ctrl->GetCurrentCol(),m_ctrl->GetCurrentRow(),&cell);
+		m_ctrl->RedrawCell(m_ctrl->GetCurrentCol(),m_ctrl->GetCurrentRow());
+	}
+
+	CRect rectCell;
+	m_ctrl->GetCellRect(m_ctrl->GetCurrentCol(),m_ctrl->GetCurrentRow(),&rectCell);
+	m_ctrl->m_CUGGrid->ClientToScreen(rectCell);
+	
+	ZRangeMonthCalCtrl wndMonthCal;
+	if(!wndMonthCal.CreateEx(WS_EX_DLGMODALFRAME,MONTHCAL_CLASS,_T(""),MCS_DAYSTATE | WS_POPUP | MCS_NOSELCHANGEONNAV,
+		CRect(rectCell.left,rectCell.bottom+1,rectCell.left,rectCell.bottom+1),
+		m_ctrl,0,NULL))
+	{
+		return UG_ERROR;
+	}
+	wndMonthCal.set_the_other_time(the_other_time_);
+	// populate structure with default values
+	UGCTMONTHCALSETTINGS mcs;
+	mcs.clrBk=wndMonthCal.GetColor(MCSC_BACKGROUND);
+	mcs.clrText=wndMonthCal.GetColor(MCSC_TEXT);
+	mcs.clrMonthBk=wndMonthCal.GetColor(MCSC_MONTHBK);
+	mcs.clrTitleText=wndMonthCal.GetColor(MCSC_TITLETEXT);
+	mcs.clrTitleBk=wndMonthCal.GetColor(MCSC_TITLEBK);
+	mcs.clrTrailingText=wndMonthCal.GetColor(MCSC_TRAILINGTEXT);
+	mcs.nFirstDayOfWeek=wndMonthCal.GetFirstDayOfWeek();
+	mcs.nFlags=wndMonthCal.GetStyle()&(MCS_WEEKNUMBERS|MCS_NOTODAYCIRCLE|MCS_NOTODAY);
+	mcs.nScrollRate=wndMonthCal.GetMonthDelta();
+	mcs.szDimension=CSize(2,1);
+	mcs.dateCur=date;
+	CFont* pFont=wndMonthCal.GetFont();
+	ASSERT(pFont!=NULL);
+	VERIFY(pFont->GetLogFont(&mcs.lf));
+
+	// check if this data is wanted to be customized
+	OnCellTypeNotify(m_ID,m_ctrl->GetCurrentCol(),
+		m_ctrl->GetCurrentRow(),UGCT_DISPLAYMONTHCAL,(LPARAM)&mcs);
+	wndMonthCal.SetColor(MCSC_BACKGROUND,mcs.clrBk);
+	wndMonthCal.SetColor(MCSC_TEXT,mcs.clrText);
+	wndMonthCal.SetColor(MCSC_MONTHBK,mcs.clrMonthBk);
+	wndMonthCal.SetColor(MCSC_TITLETEXT,mcs.clrTitleText);
+	wndMonthCal.SetColor(MCSC_TITLEBK,mcs.clrTitleBk);
+	wndMonthCal.SetColor(MCSC_TRAILINGTEXT,mcs.clrTrailingText);
+	wndMonthCal.SetFirstDayOfWeek(mcs.nFirstDayOfWeek);
+	wndMonthCal.
+		ModifyStyle((MCS_WEEKNUMBERS|MCS_NOTODAYCIRCLE|MCS_NOTODAY),mcs.nFlags);
+	wndMonthCal.SetMonthDelta(mcs.nScrollRate);
+	CFont font;
+	VERIFY(font.CreateFontIndirect(&mcs.lf));
+	wndMonthCal.SetFont(&font);
+
+	SetMonthCalDimension(&wndMonthCal,mcs.szDimension);
+	CRect rect;
+	wndMonthCal.GetWindowRect(rect);
+	AdjustMonthCalPosition(rect);
+    if (rect.top >= rectCell.bottom)
+		wndMonthCal.SetWindowPos(NULL,rect.left ,rect.top,rect.Width(),rect.Height(), SWP_NOZORDER);
+	else
+		wndMonthCal.SetWindowPos(NULL, rect.left - rect.Width() + rectCell.Width() - 20, rect.top,
+			                     rect.Width(), rect.Height(), SWP_NOZORDER);
+
+	wndMonthCal.SetCurSel(mcs.dateCur);
+
+	ReleaseCapture();
+	wndMonthCal.ShowWindow(SW_SHOWNA);
+	wndMonthCal.SetFocus();
+	SYSTEMTIME sys_time;
+	if(date.GetStatus() != COleDateTime::invalid)
+		date.GetAsSystemTime(sys_time);
+	wndMonthCal.SetMonthCalState(date.GetStatus() != COleDateTime::invalid ? CTime(sys_time) : CTime(0));
+	wndMonthCal.UpdateWindow();
+	m_bActiveMonthCal=TRUE;
+
+	MSG lastMsg;
+	BOOL bRouteLastMessage=FALSE;
+	// init message loop
+	// nState = 0 - control is active
+	// nState = 1 - user selected some date
+	// nState = 2 - user left control without selecting any date
+	int nState=0;
+	while(nState==0)
+	{
+		MSG msg;
+		VERIFY(::GetMessage(&msg, NULL, 0, 0));
+		bool set_state = false;
+		if(msg.message==WM_LBUTTONDOWN || msg.message==WM_RBUTTONDOWN ||
+			msg.message==WM_MBUTTONDOWN || msg.message==WM_NCLBUTTONDOWN ||
+			msg.message==WM_NCRBUTTONDOWN || msg.message==WM_NCMBUTTONDOWN)
+		{
+			if(msg.hwnd!=wndMonthCal.GetSafeHwnd())
+			{
+				nState=2;
+				lastMsg=msg;
+				bRouteLastMessage=TRUE;
+				break;
+			}
+		}
+
+		if (msg.message == WM_KEYDOWN && msg.hwnd == wndMonthCal.GetSafeHwnd() &&
+			((int)msg.wParam == VK_ESCAPE ||(int)msg.wParam == VK_RETURN)) 
+		{
+			nState=2;
+		}
+
+		if (msg.message == WM_LBUTTONUP && msg.hwnd == wndMonthCal.GetSafeHwnd())
+		{
+			POINTS points = MAKEPOINTS(msg.lParam);
+			CPoint pt(points.x, points.y);
+			MCHITTESTINFO mcHitTestInfo = {sizeof(MCHITTESTINFO)};
+			mcHitTestInfo.pt = pt;
+			wndMonthCal.HitTest(&mcHitTestInfo);
+			if(wndMonthCal.IsMonthView())
+			{
+				if (mcHitTestInfo.uHit == MCHT_CALENDARDATE ||
+					mcHitTestInfo.uHit == MCHT_CALENDARDATENEXT ||
+					mcHitTestInfo.uHit == MCHT_CALENDARDATEPREV ||
+					mcHitTestInfo.uHit == MCHT_TODAYLINK)
+				{
+					nState = 1;
+					if (mcHitTestInfo.uHit != MCHT_TODAYLINK)
+					{
+						date.SetDateTime(mcHitTestInfo.st.wYear, mcHitTestInfo.st.wMonth,
+										mcHitTestInfo.st.wDay, mcHitTestInfo.st.wHour,
+										mcHitTestInfo.st.wMinute, mcHitTestInfo.st.wSecond);
+					} else 
+					{
+						wndMonthCal.GetToday(date);
+					}
+				}
+			} else if(wndMonthCal.IsYearView())
+			{
+				if(mcHitTestInfo.uHit == MCHT_CALENDARDATE)
+				{
+					set_state = true;					
+					date.SetDateTime(mcHitTestInfo.st.wYear, mcHitTestInfo.st.wMonth,
+					date.GetDay(), date.GetHour(),date.GetMinute(),date.GetSecond());
+					UGCTCONVERTDATE cd;
+					cd.date=date;
+					ConvertDateToString(date,cd.string);
+					OnCellTypeNotify(m_ID,m_ctrl->GetCurrentCol(),
+						m_ctrl->GetCurrentRow(),UGCT_CONVERTDATE,(LPARAM)&cd);
+					cell.SetDateAndKeepTime(date.GetYear(), date.GetMonth(), date.GetDay());
+					m_ctrl->SetCell(m_ctrl->GetCurrentCol(),m_ctrl->GetCurrentRow(),&cell);
+				}
+			}
+		}
+
+		::DispatchMessage(&msg);
+		if(msg.message == WM_MOUSEWHEEL || set_state)
+		{
+			SYSTEMTIME sys_time;
+			if(date.GetStatus() != COleDateTime::invalid)
+				date.GetAsSystemTime(sys_time);
+			wndMonthCal.set_the_other_time(the_other_time_);
+			wndMonthCal.SetMonthCalState(date.GetStatus() != COleDateTime::invalid ? CTime(sys_time) : CTime(0));
+		}
+	}
+
+	ASSERT(nState==1 || nState==2);
+
+	m_bActiveMonthCal=FALSE;
+	m_btnDown = FALSE;
+
+	if( nState==1 && cell.GetReadOnly() != TRUE )
+	{
+		UGCTCONVERTDATE cd;
+		cd.date=date;
+		ConvertDateToString(date,cd.string);
+		OnCellTypeNotify(m_ID,m_ctrl->GetCurrentCol(),
+			m_ctrl->GetCurrentRow(),UGCT_CONVERTDATE,(LPARAM)&cd);
+		cell.SetDateAndKeepTime(date.GetYear(), date.GetMonth(), date.GetDay());
+		m_ctrl->SetCell(m_ctrl->GetCurrentCol(),m_ctrl->GetCurrentRow(),&cell);
+		m_ctrl->RedrawCell(m_ctrl->GetCurrentCol(),m_ctrl->GetCurrentRow());
+	}
+
+	VERIFY(wndMonthCal.DestroyWindow());
+	m_ctrl->m_CUGGrid->SetFocus();
+	m_ctrl->RedrawAll();
+
+	if(bRouteLastMessage)
+		::DispatchMessage(&lastMsg);
+
+	return UG_SUCCESS;
+}
+
+#endif  //	_MFC_VER>0x0421
