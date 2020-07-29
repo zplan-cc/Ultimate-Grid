@@ -56,6 +56,7 @@ CUGCTDateTimePicker::CUGCTDateTimePicker()
 	m_Lightpen.CreatePen(PS_SOLID,1,RGB(225,225,225));
 	m_Darkpen.CreatePen(PS_SOLID,1,GetSysColor(COLOR_BTNSHADOW));
 	m_Facepen.CreatePen(PS_SOLID,1,GetSysColor(COLOR_BTNFACE));
+	m_monthHorNum = 1;
 }
 
 /***************************************************
@@ -374,6 +375,14 @@ void CUGCTDateTimePicker::OnDraw(CDC *dc,RECT *rect,int col,long row,CUGCell *ce
 		cell->SetTextColor(nOldTextColor);
 }
 
+int CUGCTDateTimePicker::SetMonthNum(int num)
+{
+	if(num > 3 || num < 1)
+		return UG_ERROR;
+	m_monthHorNum = num;
+	return UG_SUCCESS;
+}
+
 /***************************************************
 DisplayMonthCalendar
 	Displays the pop-up date-time calendar next to
@@ -406,8 +415,8 @@ int CUGCTDateTimePicker::DisplayMonthCalendar()
 	}
 	else
 	{
-		//如果格子里没有文字时
-		//当状态为invalid时，日历控件会跳转到今天
+		//??????????
+		//????invalid????????????
 		date.SetStatus(COleDateTime::invalid);
 	}
 	
@@ -441,7 +450,7 @@ int CUGCTDateTimePicker::DisplayMonthCalendar()
 	mcs.nFirstDayOfWeek=wndMonthCal.GetFirstDayOfWeek();
 	mcs.nFlags=wndMonthCal.GetStyle()&(MCS_WEEKNUMBERS|MCS_NOTODAYCIRCLE|MCS_NOTODAY);
 	mcs.nScrollRate=wndMonthCal.GetMonthDelta();
-	mcs.szDimension=CSize(2,1);
+	mcs.szDimension=CSize(m_monthHorNum,1);
 	mcs.dateCur=date;
 	CFont* pFont=wndMonthCal.GetFont();
 	ASSERT(pFont!=NULL);
@@ -776,6 +785,7 @@ void CUGCTDateTimePicker::GetBestSize(CDC *dc,CSize *size,CUGCell *cell)
 CUGCTRangeDateTimePicker::CUGCTRangeDateTimePicker():CUGCTDateTimePicker()
 {
 	the_other_time_ = 0;
+	m_monthHorNum = 2;
 }
 
 int CUGCTRangeDateTimePicker::SetTheOtherTime(CTime time,bool is_other_stop)
@@ -796,89 +806,6 @@ int CUGCTRangeDateTimePicker::SetTheOtherTime(CTime time,bool is_other_stop)
 LPCTSTR CUGCTRangeDateTimePicker::GetName()
 {
 	return _T("Range-Date-Time Picker");
-}
-BOOL CUGCTRangeDateTimePicker::OnDClicked(int col,long row,RECT *rect,POINT *point){
-
-	return OnLClicked(col,row,1,rect,point);
-}
-/***************************************************
-OnLClicked - overloaded CUGCellType::OnLClicked
-
-    **See CUGCellType::OnLClicked for more details
-	about this function
-****************************************************/
-BOOL CUGCTRangeDateTimePicker::OnLClicked(int col,long row,int updn,
-									 RECT *rect,POINT *point)
-{
-	// v7.2 - update 01 - make sure that the read only cells do not
-	// show calendar - submitted by mhorowit
-	CUGCell cell;
-	m_ctrl->GetCellIndirect(col,row,&cell);
-
-	if ( cell.GetReadOnly() == TRUE )
-		return UG_SUCCESS;
-
-	if(updn)
-	{
-		if(point->x > (rect->right - m_btnWidth))
-		{			
-			//copy the droplist button co-ords
-			CopyRect(&m_btnRect,rect);
-			m_btnRect.left = rect->right - m_btnWidth;
-		
-			//redraw the button
-			m_btnDown = TRUE;
-			m_btnCol = col;
-			m_btnRow = row;
-			m_ctrl->RedrawCell(m_btnCol,m_btnRow);
-
-			//start the drop list
-			DisplayMonthCalendar();
-			return FALSE;
-		}
-		else if(m_btnCol ==-2)
-		{
-			m_btnCol = -1;
-			m_btnRow = -1;			
-			return FALSE;
-		}
-	}
-	else if(m_btnDown)
-	{		
-		m_btnDown = FALSE;
-		m_ctrl->RedrawCell(col,row);
-		return TRUE;
-	}
-
-	return FALSE;
-}
-
-BOOL CUGCTRangeDateTimePicker::OnKeyDown(int col,long row,UINT *vcKey){
-
-	// v7.2 - update 01 - make sure that the read only cells do not
-	// show calendar - submitted by mhorowit
-	CUGCell cell;
-	m_ctrl->GetCellIndirect(col,row,&cell);
-
-	if ( cell.GetReadOnly() == TRUE )
-		return UG_SUCCESS;
-
-	if(*vcKey==VK_RETURN)
-	{
-		DisplayMonthCalendar();
-		*vcKey =0;
-		return TRUE;
-	}
-	if(*vcKey==VK_DOWN)
-	{
-		if(GetKeyState(VK_CONTROL) <0)
-		{
-			DisplayMonthCalendar();
-			*vcKey =0;
-			return TRUE;
-		}
-	}
-	return FALSE;
 }
 
 int CUGCTRangeDateTimePicker::DisplayMonthCalendar() {
@@ -935,7 +862,7 @@ int CUGCTRangeDateTimePicker::DisplayMonthCalendar() {
 	mcs.nFirstDayOfWeek=wndMonthCal.GetFirstDayOfWeek();
 	mcs.nFlags=wndMonthCal.GetStyle()&(MCS_WEEKNUMBERS|MCS_NOTODAYCIRCLE|MCS_NOTODAY);
 	mcs.nScrollRate=wndMonthCal.GetMonthDelta();
-	mcs.szDimension=CSize(2,1);
+	mcs.szDimension=CSize(m_monthHorNum,1);
 	mcs.dateCur=date;
 	CFont* pFont=wndMonthCal.GetFont();
 	ASSERT(pFont!=NULL);

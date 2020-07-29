@@ -132,7 +132,7 @@ protected:
 	// coordinates of the currently displayed cell
 	int		m_btnCol;
 	long	m_btnRow;
-
+	int		m_monthHorNum;//显示月历的横向数目
 	// pens used to draw the cell contents
 	CPen	m_Darkpen;
 	CPen	m_Lightpen;
@@ -148,7 +148,7 @@ protected:
 
 protected:
 	// displays month calendar for current cell
-	int DisplayMonthCalendar();
+	virtual int DisplayMonthCalendar();
 
 	// --- In  :	date	-	COleDateTime object that represents the date 
 	//							to be formated into the string
@@ -196,6 +196,8 @@ public:
 	// --- Effect : Destructs the object
 	~CUGCTDateTimePicker();
 
+	int SetMonthNum(int num);
+	int GetMonthNum(){return m_monthHorNum;}
 
 	//overloaded CUGCellType functions
 	virtual LPCTSTR GetName();
@@ -220,14 +222,11 @@ class UG_CLASS_DECL CUGCTRangeDateTimePicker: public CUGCTDateTimePicker
 {
 protected:
 	// displays month calendar for current cell
-	int DisplayMonthCalendar();
+	virtual int DisplayMonthCalendar();
 public:
 	CUGCTRangeDateTimePicker();
 	int	SetTheOtherTime(CTime t,bool is_other_stop);
 	virtual LPCTSTR GetName();
-	virtual BOOL OnLClicked(int col,long row,int updn,RECT *rect,POINT *point);
-	virtual BOOL OnDClicked(int col,long row,RECT *rect,POINT *point);
-	virtual BOOL OnKeyDown(int col,long row,UINT *vcKey);
 public:
 	CTime the_other_time_;
 };
