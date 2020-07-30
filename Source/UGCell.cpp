@@ -859,7 +859,7 @@ double	CUGCell::GetNumber()
 		if ( m_dataType == UGCELLDATA_NUMBER ||
 			  m_dataType == UGCELLDATA_CURRENCY ||
 			  m_dataType == UGCELLDATA_TIME ||
-			  m_dataType == UGCELLRANGE_DATA_TIME)
+			  m_dataType == UGCELLPAIR_DATA_TIME)
 		{
 			return m_nNumber;
 		}
@@ -1102,7 +1102,7 @@ int CUGCell::SetDateAndKeepTime(int year,int month,int day)
 {
 	time_t time;
 	int hour, minute;
-	if (m_dataType == UGCELLDATA_TIME || m_dataType == UGCELLRANGE_DATA_TIME)
+	if (m_dataType == UGCELLDATA_TIME || m_dataType == UGCELLPAIR_DATA_TIME)
 	{
 		tm ltm;
 		CTime time_before = m_nNumber;
@@ -1144,7 +1144,7 @@ int	CUGCell::GetTime(int* second,int* minute,int* hour,int* day,int* month,int* 
 {
 	time_t time;
 
-	if (m_dataType == UGCELLDATA_TIME || m_dataType == UGCELLRANGE_DATA_TIME)
+	if (m_dataType == UGCELLDATA_TIME || m_dataType == UGCELLPAIR_DATA_TIME)
 		time = m_nNumber;
 	else
 		// convert cell's string into a date fromat
@@ -1167,7 +1167,7 @@ time_t CUGCell::GetTime()
 {
 	time_t t;
 
-	if (m_dataType == UGCELLDATA_TIME || m_dataType == UGCELLRANGE_DATA_TIME)
+	if (m_dataType == UGCELLDATA_TIME || m_dataType == UGCELLPAIR_DATA_TIME)
 		t = (time_t)m_nNumber;
 	else
 		// convert cell's string into a date fromat
@@ -1190,7 +1190,7 @@ SetDataType
 			UGCELLDATA_BOOL	
 			UGCELLDATA_TIME	
 			UGCELLDATA_CURRENCY
-			UGCELLRANGE_DATA_TIME
+			UGCELLPAIR_DATA_TIME
 	Params
 		type
 	Return 
@@ -1208,7 +1208,7 @@ int	CUGCell::SetDataType(short type)
 		StringToNumber( &cellVal, &m_nNumber );
 		m_string = "";
 	}
-	else if ( type == UGCELLDATA_TIME || type == UGCELLRANGE_DATA_TIME)
+	else if ( type == UGCELLDATA_TIME || type == UGCELLPAIR_DATA_TIME)
 	{
 		CString cellVal = GetText();
 		time_t time = 0;

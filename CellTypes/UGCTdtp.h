@@ -132,7 +132,7 @@ protected:
 	// coordinates of the currently displayed cell
 	int		m_btnCol;
 	long	m_btnRow;
-	int		m_monthHorNum;//显示月历的横向数目
+	int		m_monthNum;//显示月历的数目
 	// pens used to draw the cell contents
 	CPen	m_Darkpen;
 	CPen	m_Lightpen;
@@ -197,7 +197,7 @@ public:
 	~CUGCTDateTimePicker();
 
 	int SetMonthNum(int num);
-	int GetMonthNum(){return m_monthHorNum;}
+	int GetMonthNum(){return m_monthNum;}
 
 	//overloaded CUGCellType functions
 	virtual LPCTSTR GetName();
@@ -216,19 +216,6 @@ public:
 		CSize szMargins=CSize(0,0));
 	static BOOL GetMonthCalReqRect(CMonthCalCtrl* pMonthCal, RECT* pRect, 
 		CSize szDimension);
-};
-
-class UG_CLASS_DECL CUGCTRangeDateTimePicker: public CUGCTDateTimePicker
-{
-protected:
-	// displays month calendar for current cell
-	virtual int DisplayMonthCalendar();
-public:
-	CUGCTRangeDateTimePicker();
-	int	SetTheOtherTime(CTime t,bool is_other_stop);
-	virtual LPCTSTR GetName();
-public:
-	CTime the_other_time_;
 };
 #endif	//_MFC_VER>0x0421
 #endif  //#ifndef _UGCTdtp_H_
