@@ -74,6 +74,7 @@
 #define UGCELLDATA_BOOL			3
 #define UGCELLDATA_TIME			4
 #define UGCELLDATA_CURRENCY		5
+#define UGCELLPAIR_DATA_TIME	6
 
 class CUGCtrl;
 
@@ -219,8 +220,8 @@ public:
 	int		GetNumberDecimals();
 
 	//***** Time data type functions *****
-	int		SetTime(int second,int minute,int hour,int day,int month,int year);
-	int		SetTime(time_t t);
+	int		SetTime(int second,int minute,int hour,int day,int month,int year, short type = UGCELLDATA_TIME);
+	int		SetTime(time_t t, short type = UGCELLDATA_TIME);
 	int		SetDateAndKeepTime(int year,int month,int day);
 	int		GetTime(int* second,int* minute,int* hour,int* day,int* month,int* year);
 	time_t	GetTime();

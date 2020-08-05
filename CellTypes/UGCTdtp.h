@@ -4,7 +4,7 @@
 	Source file : UGCTdtp.cpp
 	Header file : UGCTdtp.h
 // This software along with its related components, documentation and files ("The Libraries")
-// is � 1994-2007 The Code Project (1612916 Ontario Limited) and use of The Libraries is
+// is ?1994-2007 The Code Project (1612916 Ontario Limited) and use of The Libraries is
 // governed by a software license agreement ("Agreement").  Copies of the Agreement are
 // available at The Code Project (www.codeproject.com), as part of the package you downloaded
 // to obtain this file, or directly from our office.  For a copy of the license governing
@@ -122,6 +122,7 @@ typedef struct UG_CLASS_DECL _tagUGCTMONTHCALSETTINGS
 
 class UG_CLASS_DECL CUGCTDateTimePicker: public CUGCellType
 {
+protected:
 	// width of the dropdown button
 	int		m_btnWidth;
 	// internal flag. Set to TRUE if dropdown button is currently pressed
@@ -131,7 +132,7 @@ class UG_CLASS_DECL CUGCTDateTimePicker: public CUGCellType
 	// coordinates of the currently displayed cell
 	int		m_btnCol;
 	long	m_btnRow;
-
+	int		m_monthNum;//显示月历的数目
 	// pens used to draw the cell contents
 	CPen	m_Darkpen;
 	CPen	m_Lightpen;
@@ -147,7 +148,7 @@ protected:
 
 protected:
 	// displays month calendar for current cell
-	int DisplayMonthCalendar();
+	virtual int DisplayMonthCalendar();
 
 	// --- In  :	date	-	COleDateTime object that represents the date 
 	//							to be formated into the string
@@ -195,6 +196,8 @@ public:
 	// --- Effect : Destructs the object
 	~CUGCTDateTimePicker();
 
+	int SetMonthNum(int num);
+	int GetMonthNum(){return m_monthNum;}
 
 	//overloaded CUGCellType functions
 	virtual LPCTSTR GetName();

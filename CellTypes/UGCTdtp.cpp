@@ -3,7 +3,7 @@
 **************************************************************************
 	Source file : UGCTdtp.cpp
 // This software along with its related components, documentation and files ("The Libraries")
-// is © 1994-2007 The Code Project (1612916 Ontario Limited) and use of The Libraries is
+// is ?1994-2007 The Code Project (1612916 Ontario Limited) and use of The Libraries is
 // governed by a software license agreement ("Agreement").  Copies of the Agreement are
 // available at The Code Project (www.codeproject.com), as part of the package you downloaded
 // to obtain this file, or directly from our office.  For a copy of the license governing
@@ -15,7 +15,7 @@
 #if _MFC_VER>0x0421
 
 #include <winuser.h>
-#include "UGCtrl.h"
+#include "../Include/UGCtrl.h"
 #include "UGCTdtp.h"
 
 #ifdef _DEBUG
@@ -55,6 +55,7 @@ CUGCTDateTimePicker::CUGCTDateTimePicker()
 	m_Lightpen.CreatePen(PS_SOLID,1,RGB(225,225,225));
 	m_Darkpen.CreatePen(PS_SOLID,1,GetSysColor(COLOR_BTNSHADOW));
 	m_Facepen.CreatePen(PS_SOLID,1,GetSysColor(COLOR_BTNFACE));
+	m_monthNum = 1;
 }
 
 /***************************************************
@@ -373,6 +374,14 @@ void CUGCTDateTimePicker::OnDraw(CDC *dc,RECT *rect,int col,long row,CUGCell *ce
 		cell->SetTextColor(nOldTextColor);
 }
 
+int CUGCTDateTimePicker::SetMonthNum(int num)
+{
+	if(num > 3 || num < 1)
+		return UG_ERROR;
+	m_monthNum = num;
+	return UG_SUCCESS;
+}
+
 /***************************************************
 DisplayMonthCalendar
 	Displays the pop-up date-time calendar next to
@@ -390,10 +399,26 @@ int CUGCTDateTimePicker::DisplayMonthCalendar()
 	CUGCell cell;
 	m_ctrl->GetCellIndirect(m_ctrl->GetCurrentCol(),m_ctrl->GetCurrentRow(),&cell);
 
-	CString sText=cell.GetText();
 	COleDateTime date;
-	ConvertStringToDate(sText,date);
-
+	if (!CString(cell.GetText()).IsEmpty() && cell.GetDataType() == UGCELLDATA_TIME)
+	{
+		int year, month, day, hour, minute, second;
+		bool zero_as_24, date_only;
+		cell.GetTime(&second, &minute, &hour, &day, &month, &year);
+		date.SetDate(year, month, day);
+		cell.GetTimeMode(zero_as_24, date_only);
+		if (zero_as_24 && hour==0 && minute==0 && second==0)
+		{
+			date -= COleDateTimeSpan(1, 0, 0, 0);
+		}
+	}
+	else
+	{
+		//??????????
+		//????invalid????????????
+		date.SetStatus(COleDateTime::invalid);
+	}
+	
 	if(cell.GetParam())
 	{
 		cell.SetParam(FALSE);
@@ -424,7 +449,7 @@ int CUGCTDateTimePicker::DisplayMonthCalendar()
 	mcs.nFirstDayOfWeek=wndMonthCal.GetFirstDayOfWeek();
 	mcs.nFlags=wndMonthCal.GetStyle()&(MCS_WEEKNUMBERS|MCS_NOTODAYCIRCLE|MCS_NOTODAY);
 	mcs.nScrollRate=wndMonthCal.GetMonthDelta();
-	mcs.szDimension=CSize(1,1);
+	mcs.szDimension=CSize(m_monthNum,1);
 	mcs.dateCur=date;
 	CFont* pFont=wndMonthCal.GetFont();
 	ASSERT(pFont!=NULL);
@@ -451,8 +476,11 @@ int CUGCTDateTimePicker::DisplayMonthCalendar()
 	CRect rect;
 	wndMonthCal.GetWindowRect(rect);
 	AdjustMonthCalPosition(rect);
-	wndMonthCal.SetWindowPos(NULL,rect.left,rect.top,rect.Width(),rect.Height(),
-		SWP_NOZORDER);
+    if (rect.top >= rectCell.bottom)
+		wndMonthCal.SetWindowPos(NULL,rect.left ,rect.top,rect.Width(),rect.Height(), SWP_NOZORDER);
+	else
+		wndMonthCal.SetWindowPos(NULL, rect.left - rect.Width() + rectCell.Width() - 20, rect.top,
+			                     rect.Width(), rect.Height(), SWP_NOZORDER);
 
 	wndMonthCal.SetCurSel(mcs.dateCur);
 
@@ -493,7 +521,7 @@ int CUGCTDateTimePicker::DisplayMonthCalendar()
 			nState=2;
 		}
 
-		if(msg.message==WM_LBUTTONUP && msg.hwnd==wndMonthCal.GetSafeHwnd())
+		if (msg.message == WM_LBUTTONUP && msg.hwnd == wndMonthCal.GetSafeHwnd() && wndMonthCal.IsMonthView())
 		{
 			POINTS points=MAKEPOINTS(msg.lParam);	
 			CPoint pt(points.x,points.y);
@@ -540,7 +568,7 @@ int CUGCTDateTimePicker::DisplayMonthCalendar()
 		ConvertDateToString(date,cd.string);
 		OnCellTypeNotify(m_ID,m_ctrl->GetCurrentCol(),
 			m_ctrl->GetCurrentRow(),UGCT_CONVERTDATE,(LPARAM)&cd);
-		cell.SetText(cd.string);
+		cell.SetDateAndKeepTime(date.GetYear(), date.GetMonth(), date.GetDay());
 		m_ctrl->SetCell(m_ctrl->GetCurrentCol(),m_ctrl->GetCurrentRow(),&cell);
 		m_ctrl->RedrawCell(m_ctrl->GetCurrentCol(),m_ctrl->GetCurrentRow());
 	}
@@ -753,5 +781,4 @@ void CUGCTDateTimePicker::GetBestSize(CDC *dc,CSize *size,CUGCell *cell)
 		size->cx += m_btnWidth;
 	}
 }
-
-#endif	//	_MFC_VER>0x0421
+#endif  //	_MFC_VER>0x0421

@@ -272,6 +272,7 @@ Params:
 				UGCELLDATA_BOOL		(3)	booliean
 				UGCELLDATA_TIME		(4)	date/time
 				UGCELLDATA_CURRENCY	(5)	currency
+				UGCELLPAIR_DATA_TIME(6)pair/date/time
 Return:
 	UG_NA		not available
 	UG_SUCCESS	success
